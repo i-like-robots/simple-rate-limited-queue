@@ -1,0 +1,55 @@
+{
+  "name": "async-queue",
+  "version": "0.0.0",
+  "description": "",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.cts",
+  "exports": {
+    "require": {
+      "types": "./dist/index.d.cts",
+      "default": "./dist/index.cjs"
+    },
+    "import": {
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
+    }
+  },
+  "scripts": {
+    "build": "pkgroll",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint .",
+    "format": "prettier $([ $CI ] && echo '--check' || echo '--write') '**/*.{cjs,mjs,js,jsx,ts,tsx,json,yml}'",
+    "spec": "vitest run",
+    "verify": "npm run lint && npm run type-check && npm run format",
+    "test": "npm run verify && npm run spec",
+    "prepublishOnly": "npm run test && npm run build",
+    "prepare": "husky install"
+  },
+  "keywords": [],
+  "author": "Matt Hinchliffe",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/i-like-robots/ts-package-boilerplate.git"
+  },
+  "bugs": {
+    "url": "https://github.com/i-like-robots/ts-package-boilerplate/issues"
+  },
+  "homepage": "https://github.com/i-like-robots/ts-package-boilerplate",
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "eslint": "^9.26.0",
+    "husky": "^9.1.6",
+    "lint-staged": "^15.5.0",
+    "pkgroll": "^2.12.2",
+    "prettier": "^3.5.2",
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.32.0",
+    "vitest": "^3.1.2"
+  },
+  "engines": {
+    "node": ">= 22.10.0"
+  }
+}
