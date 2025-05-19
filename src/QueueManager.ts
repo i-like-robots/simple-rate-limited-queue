@@ -1,7 +1,7 @@
 import { Dequeue } from './Dequeue.js'
 import { type Callback, Task } from './Task.js'
 
-export type Priority = 'low' | 'high'
+export type Priority = 0 | 1
 
 export type Options = {
   maxConcurrency: number
@@ -90,8 +90,6 @@ export class QueueManager {
 
     this.#endInterval()
 
-    // this.#controller.abort('Queue terminated')
-
     while (this.#queue.size) {
       this.#queue.shift().reject()
     }
@@ -104,43 +102,17 @@ export class QueueManager {
 
     this.#isTerminated = false
 
-    // this.#controller = new AbortController()
     this.#queue = new Dequeue()
 
     this.#startInterval()
   }
 
-  schedule<T>(callback: Callback<T>, priority: Priority = 'low'): Promise<T> {
+  schedule<T>(callback: Callback<T>, priority: Priority = 0): Promise<T> {
     if (this.#isTerminated) return null
-
-    // const operation = new Promise<T>((resolve, reject) => {
-    //   const onAbort = () => reject(this.#controller.signal.reason)
-
-    //   this.#controller.signal.addEventListener('abort', onAbort, {
-    //     signal: this.#controller.signal,
-    //   })
-
-    //   const job = async () => {
-    //     try {
-    //       const result = await callback()
-    //       resolve(result)
-    //     } catch (error) {
-    //       reject(error)
-    //     } finally {
-    //       this.#controller.signal.removeEventListener('abort', onAbort)
-    //     }
-    //   }
-
-    //   if (priority === 'high') {
-    //     this.#queue.unshift(job)
-    //   } else {
-    //     this.#queue.push(job)
-    //   }
-    // })
 
     const task = new Task<T>(callback)
 
-    if (priority === 'high') {
+    if (priority === 1) {
       this.#queue.unshift(task)
     } else {
       this.#queue.push(task)
