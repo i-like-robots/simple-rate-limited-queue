@@ -1,9 +1,15 @@
-export type Callback<T extends unknown> = (() => T) | (() => PromiseLike<T>)
+export type Callback<T> = () => T | PromiseLike<T>
 
 export enum Status {
   Pending,
   Fulfilled,
   Rejected,
+}
+
+function isFunction(value: unknown): asserts value is Callback<unknown> {
+  if (typeof value !== 'function') {
+    throw new TypeError('Callback must be a function')
+  }
 }
 
 export class Task<T> {
@@ -15,11 +21,14 @@ export class Task<T> {
 
   #resolve: (value: T) => void
 
-  #reject: (value?: any) => void
+  #reject: (value?: unknown) => void
 
   constructor(callback: Callback<T>) {
+    isFunction(callback)
+
     this.#callback = callback
 
+    // TODO: refactor to use Promise.withResolvers() in future
     this.promise = new Promise((resolve, reject) => {
       this.#resolve = resolve
       this.#reject = reject
@@ -44,7 +53,7 @@ export class Task<T> {
     this.#resolve(value)
   }
 
-  reject(reason: any = 'Task cancelled') {
+  reject(reason: unknown = 'Task cancelled') {
     if (this.#status !== Status.Pending) return
 
     this.#status = Status.Rejected
