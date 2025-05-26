@@ -1,7 +1,7 @@
 {
-  "name": "async-queue",
+  "name": "simple-rate-limited-queue",
   "version": "0.0.0",
-  "description": "",
+  "description": "A simple rate limited queue, to restrict operations to a maximum concurrency limit.",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
@@ -50,6 +50,6 @@
     "vitest": "^3.1.2"
   },
   "engines": {
-    "node": ">= 22.10.0"
+    "node": ">= 20.10.0"
   }
 }

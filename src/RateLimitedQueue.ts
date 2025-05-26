@@ -8,7 +8,7 @@ export type Options = {
   intervalLength: number
 }
 
-export class QueueManager {
+export class RateLimitedQueue {
   #queue = new Dequeue<Task<unknown>>()
 
   #isPaused = false
@@ -16,8 +16,6 @@ export class QueueManager {
   #isTerminated = false
 
   #inProgress = 0
-
-  // #controller = new AbortController()
 
   #timeoutId: NodeJS.Timeout = undefined
 
@@ -107,8 +105,10 @@ export class QueueManager {
     this.#startInterval()
   }
 
-  schedule<T>(callback: Callback<T>, priority: Priority = 0): Promise<T> {
-    if (this.#isTerminated) return null
+  async schedule<T>(callback: Callback<T>, priority: Priority = 0): Promise<T> {
+    if (this.#isTerminated) {
+      throw new Error('Failed to schedule task, the queue has been terminated')
+    }
 
     const task = new Task<T>(callback)
 
@@ -118,7 +118,7 @@ export class QueueManager {
       this.#queue.push(task)
     }
 
-    this.#startInterval()
+    this.#run()
 
     return task.promise
   }

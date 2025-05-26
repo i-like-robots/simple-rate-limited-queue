@@ -1,1 +1,1 @@
-export { QueueManager, type Options, type Priority } from './QueueManager'
+export { RateLimitedQueue, type Options, type Priority } from './RateLimitedQueue'
