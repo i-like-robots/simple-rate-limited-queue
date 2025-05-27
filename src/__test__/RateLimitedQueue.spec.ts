@@ -114,7 +114,7 @@ describe('RateLimitedQueue', () => {
       const mockFn = vitest.fn(() => 42)
 
       queue.terminate()
-      
+
       await vitest.advanceTimersByTimeAsync(1000)
       await expect(queue.schedule(mockFn)).rejects.toThrowError()
 
