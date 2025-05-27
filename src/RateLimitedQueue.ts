@@ -4,7 +4,9 @@ import { type Callback, Task } from './Task.js'
 export type Priority = 0 | 1
 
 export type Options = {
+  /** The maximum number of operations to execute per time interval */
   maxConcurrency: number
+  /** The length of each time interval in milliseconds */
   intervalLength: number
 }
 

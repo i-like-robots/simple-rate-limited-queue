@@ -1,7 +1,7 @@
 {
   "name": "simple-rate-limited-queue",
   "version": "0.0.0",
-  "description": "A simple rate limited queue, to restrict operations to a maximum concurrency limit.",
+  "description": "A simple rate limited queue for asynchronous operations. Restricts the number of operations executed per time interval.",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
