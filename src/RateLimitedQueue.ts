@@ -1,8 +1,6 @@
 import { Dequeue } from './Dequeue.js'
 import { type Callback, Task } from './Task.js'
 
-export type Priority = 0 | 1
-
 export type Options = {
   /** The maximum number of operations to execute per time interval */
   maxConcurrency: number
@@ -107,14 +105,14 @@ export class RateLimitedQueue {
     this.#startInterval()
   }
 
-  async schedule<T>(callback: Callback<T>, priority: Priority = 0): Promise<T> {
+  async schedule<T>(callback: Callback<T>, addToFront = false): Promise<T> {
     if (this.#isTerminated) {
       throw new Error('Failed to schedule task, the queue has been terminated')
     }
 
     const task = new Task<T>(callback)
 
-    if (priority === 1) {
+    if (addToFront) {
       this.#queue.unshift(task)
     } else {
       this.#queue.push(task)

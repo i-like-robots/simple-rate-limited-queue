@@ -48,9 +48,9 @@ const queue = new RateLimitedQueue({
 })
 ```
 
-#### `queue.schedule(fn)`
+#### `queue.schedule(operation[, addToFront])`
 
-Adds an operation to the queue and returns a promise which will resolve or reject with the result of the operation.
+Adds an operation to the queue and returns a promise which will resolve or reject with the result of the operation. Optionally place the operation at the front of the queue.
 
 #### `queue.pause()`
 

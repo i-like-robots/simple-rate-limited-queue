@@ -180,20 +180,22 @@ describe('RateLimitedQueue', () => {
       await expect(scheduled[5]).resolves.toBe(5)
     })
 
-    it('prioritizes task based on priority argument', async () => {
+    it('allows tasks to be added to the front of the queue', async () => {
       const queue = new RateLimitedQueue()
       const order: number[] = []
 
       queue.pause()
 
-      queue.schedule(() => order.push(1), 0)
-      queue.schedule(() => order.push(2), 1)
+      queue.schedule(() => order.push(1), false)
+      queue.schedule(() => order.push(2), true)
+      queue.schedule(() => order.push(3), false)
+      queue.schedule(() => order.push(4), true)
 
       queue.resume()
 
       await vitest.advanceTimersByTimeAsync(1000)
 
-      expect(order).toEqual([2, 1])
+      expect(order).toEqual([4, 2, 1, 3])
     })
 
     it('throws if the queue is terminated', async () => {
