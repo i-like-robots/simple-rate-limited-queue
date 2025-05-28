@@ -1,14 +1,14 @@
 import { Dequeue } from './Dequeue.js'
-import { type Callback, Task } from './Task.js'
+import { type Operation, Task } from './Task.js'
 
-export type Options = {
+type Options = {
   /** The maximum number of operations to execute per time interval */
   maxConcurrency: number
   /** The length of each time interval in milliseconds */
   intervalLength: number
 }
 
-export class RateLimitedQueue {
+class RateLimitedQueue {
   #queue = new Dequeue<Task<unknown>>()
 
   #isPaused = false
@@ -105,12 +105,12 @@ export class RateLimitedQueue {
     this.#startInterval()
   }
 
-  async schedule<T>(callback: Callback<T>, addToFront = false): Promise<T> {
+  async schedule<T>(operation: Operation<T>, addToFront = false): Promise<T> {
     if (this.#isTerminated) {
       throw new Error('Failed to schedule task, the queue has been terminated')
     }
 
-    const task = new Task<T>(callback)
+    const task = new Task<T>(operation)
 
     if (addToFront) {
       this.#queue.unshift(task)
@@ -139,3 +139,5 @@ export class RateLimitedQueue {
     return this.#isTerminated
   }
 }
+
+export { type Operation, type Options, RateLimitedQueue }

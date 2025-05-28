@@ -9,7 +9,9 @@ import { RateLimitedQueue } from 'simple-rate-limited-queue'
 
 const queue = new RateLimitedQueue()
 
-await queue.schedule(() => { … })
+function getUser(id) {
+  return queue.schedule(() => axios.get(`/user/${id}`))
+}
 ```
 
 ## Installation

@@ -32,7 +32,7 @@ describe('RateLimitedQueue', () => {
       expect(queue.isPaused).toBe(false)
     })
 
-    it('stops executing pending callbacks', async () => {
+    it('stops executing pending operations', async () => {
       const queue = new RateLimitedQueue({ maxConcurrency: 1 })
       const mockFn = vitest.fn()
 

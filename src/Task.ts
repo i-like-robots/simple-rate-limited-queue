@@ -1,4 +1,4 @@
-export type Callback<T> = () => T | PromiseLike<T>
+export type Operation<T> = () => T | PromiseLike<T>
 
 export enum Status {
   Pending,
@@ -6,9 +6,9 @@ export enum Status {
   Rejected,
 }
 
-function isFunction(value: unknown): asserts value is Callback<unknown> {
+function isFunction(value: unknown): asserts value is Operation<unknown> {
   if (typeof value !== 'function') {
-    throw new TypeError('Callback must be a function')
+    throw new TypeError('Operation must be a function')
   }
 }
 
@@ -17,16 +17,16 @@ export class Task<T> {
 
   #status: Status = Status.Pending
 
-  #callback: Callback<T>
+  #operation: Operation<T>
 
   #resolve: (value: T) => void
 
   #reject: (value?: unknown) => void
 
-  constructor(callback: Callback<T>) {
-    isFunction(callback)
+  constructor(operation: Operation<T>) {
+    isFunction(operation)
 
-    this.#callback = callback
+    this.#operation = operation
 
     // TODO: refactor to use Promise.withResolvers() in future
     this.promise = new Promise((resolve, reject) => {
@@ -39,7 +39,7 @@ export class Task<T> {
     if (this.#status !== Status.Pending) return
 
     try {
-      const result = await this.#callback()
+      const result = await this.#operation()
       this.resolve(result)
     } catch (error) {
       this.reject(error)

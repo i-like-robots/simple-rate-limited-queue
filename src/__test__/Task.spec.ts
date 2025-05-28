@@ -5,7 +5,7 @@ const wait = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms))
 
 describe('Task', () => {
   describe('constructor', () => {
-    it('throws if the callback is not a function', () => {
+    it('throws if the operation is not a function', () => {
       expect(() => new Task(null)).toThrow()
     })
 
@@ -16,7 +16,7 @@ describe('Task', () => {
   })
 
   describe('.exec()', () => {
-    it('resolves a synchronous callback', async () => {
+    it('resolves a synchronous operation', async () => {
       const task = new Task(() => 42)
 
       task.exec()
@@ -25,7 +25,7 @@ describe('Task', () => {
       expect(task.status).toBe(Status.Fulfilled)
     })
 
-    it('resolves an asynchronous callback', async () => {
+    it('resolves an asynchronous operation', async () => {
       const task = new Task(async () => {
         await wait()
         return 42
@@ -37,7 +37,7 @@ describe('Task', () => {
       expect(task.status).toBe(Status.Fulfilled)
     })
 
-    it('rejects when the synchronous callback throws', async () => {
+    it('rejects when the synchronous operation throws', async () => {
       const task = new Task(() => {
         throw new Error('Oh no!')
       })
@@ -48,7 +48,7 @@ describe('Task', () => {
       expect(task.status).toBe(Status.Rejected)
     })
 
-    it('rejects when the asynchronous callback rejects', async () => {
+    it('rejects when the asynchronous operation rejects', async () => {
       const task = new Task(async () => {
         await wait()
         throw new Error('Oh no!')
@@ -60,7 +60,7 @@ describe('Task', () => {
       expect(task.status).toBe(Status.Rejected)
     })
 
-    it('executes callback only once', async () => {
+    it('executes operation only once', async () => {
       const mockFn = vitest.fn()
       const task = new Task(mockFn)
 
