@@ -41,7 +41,7 @@ Creates a new queue instance. The options are:
 | Name               | Type   | Description                                                    |
 | ------------------ | ------ | -------------------------------------------------------------- |
 | `maxPerInterval`   | number | The maximum number of operations to execute per time interval. |
-| `maxOpsInProgress` | number | The maximum number of concurrent operations in progress        |
+| `maxInProgress` | number | The maximum number of concurrent operations in progress        |
 | `intervalLength`   | number | The length of each time interval in milliseconds.              |
 
 All of the options and their defaults are shown below:
@@ -49,7 +49,7 @@ All of the options and their defaults are shown below:
 ```js
 const queue = new RateLimitedQueue({
   maxPerInterval: 10,
-  maxOpsInProgress: 20,
+  maxInProgress: 20,
   intervalLength: 1000,
 })
 ```
