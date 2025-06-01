@@ -33,7 +33,7 @@ describe('RateLimitedQueue', () => {
     })
 
     it('stops executing pending operations', async () => {
-      const queue = new RateLimitedQueue({ maxConcurrency: 1 })
+      const queue = new RateLimitedQueue({ maxPerInterval: 1 })
       const mockFn = vitest.fn()
 
       queue.schedule(mockFn)
@@ -127,7 +127,7 @@ describe('RateLimitedQueue', () => {
 
   describe('.schedule()', () => {
     it('adds tasks to the queue', () => {
-      const queue = new RateLimitedQueue({ maxConcurrency: 1 })
+      const queue = new RateLimitedQueue({ maxPerInterval: 1 })
       const mockFn = vitest.fn()
 
       queue.pause()
@@ -146,8 +146,8 @@ describe('RateLimitedQueue', () => {
       await expect(result).resolves.toBe(42)
     })
 
-    it('rate limits concurrent tasks', async () => {
-      const queue = new RateLimitedQueue({ maxConcurrency: 2 })
+    it('executes the maximum number of operations per interval', async () => {
+      const queue = new RateLimitedQueue({ maxPerInterval: 2 })
       const mockFns = [
         vitest.fn(() => 0),
         vitest.fn(() => 1),
@@ -156,10 +156,51 @@ describe('RateLimitedQueue', () => {
         vitest.fn(() => 4),
         vitest.fn(() => 5),
       ]
-      const scheduled = mockFns.map((fn) => queue.schedule(fn))
 
-      await expect(scheduled[0]).resolves.toBe(0)
-      await expect(scheduled[1]).resolves.toBe(1)
+      mockFns.map((fn) => queue.schedule(fn))
+
+      expect(mockFns[0]).toHaveBeenCalled()
+      expect(mockFns[1]).toHaveBeenCalled()
+      expect(mockFns[2]).not.toHaveBeenCalled()
+      expect(mockFns[3]).not.toHaveBeenCalled()
+      expect(mockFns[4]).not.toHaveBeenCalled()
+      expect(mockFns[5]).not.toHaveBeenCalled()
+
+      await vitest.advanceTimersByTimeAsync(1000)
+
+      expect(mockFns[2]).toHaveBeenCalled()
+      expect(mockFns[3]).toHaveBeenCalled()
+      expect(mockFns[4]).not.toHaveBeenCalled()
+      expect(mockFns[5]).not.toHaveBeenCalled()
+
+      await vitest.advanceTimersByTimeAsync(1000)
+
+      expect(mockFns[4]).toHaveBeenCalled()
+      expect(mockFns[5]).toHaveBeenCalled()
+    })
+
+    it('limits the maximum number of in progress operations', async () => {
+      const wait = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms))
+      const queue = new RateLimitedQueue({ maxInProgress: 2 })
+      const mockFns = [
+        vitest.fn(() => wait(3000).then(() => 0)),
+        vitest.fn(() => wait(2000).then(() => 1)),
+        vitest.fn(() => wait(1000).then(() => 2)),
+        vitest.fn(() => wait(1000).then(() => 3)),
+        vitest.fn(() => wait(500).then(() => 4)),
+        vitest.fn(() => wait(100).then(() => 5)),
+      ]
+
+      mockFns.map((fn) => queue.schedule(fn))
+
+      expect(mockFns[0]).toHaveBeenCalled()
+      expect(mockFns[1]).toHaveBeenCalled()
+      expect(mockFns[2]).not.toHaveBeenCalled()
+      expect(mockFns[3]).not.toHaveBeenCalled()
+      expect(mockFns[4]).not.toHaveBeenCalled()
+      expect(mockFns[5]).not.toHaveBeenCalled()
+
+      await vitest.advanceTimersByTimeAsync(1000)
 
       expect(mockFns[2]).not.toHaveBeenCalled()
       expect(mockFns[3]).not.toHaveBeenCalled()
@@ -168,16 +209,20 @@ describe('RateLimitedQueue', () => {
 
       await vitest.advanceTimersByTimeAsync(1000)
 
-      await expect(scheduled[2]).resolves.toBe(2)
-      await expect(scheduled[3]).resolves.toBe(3)
-
+      expect(mockFns[2]).toHaveBeenCalled()
+      expect(mockFns[3]).not.toHaveBeenCalled()
       expect(mockFns[4]).not.toHaveBeenCalled()
       expect(mockFns[5]).not.toHaveBeenCalled()
 
       await vitest.advanceTimersByTimeAsync(1000)
 
-      await expect(scheduled[4]).resolves.toBe(4)
-      await expect(scheduled[5]).resolves.toBe(5)
+      expect(mockFns[3]).toHaveBeenCalled()
+      expect(mockFns[4]).toHaveBeenCalled()
+      expect(mockFns[5]).not.toHaveBeenCalled()
+
+      await vitest.advanceTimersByTimeAsync(1000)
+
+      expect(mockFns[5]).toHaveBeenCalled()
     })
 
     it('allows tasks to be added to the front of the queue', async () => {

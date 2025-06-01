@@ -2,7 +2,7 @@
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/i-like-robots/simple-rate-limited-queue/blob/main/LICENSE) ![build status](https://github.com/i-like-robots/simple-rate-limited-queue/actions/workflows/test.yml/badge.svg?branch=main) [![npm version](https://img.shields.io/npm/v/simple-rate-limited-queue.svg?style=flat)](https://www.npmjs.com/package/simple-rate-limited-queue)
 
-A simple rate limited queue for asynchronous operations. Restricts the number of operations executed per time interval.
+A simple rate limited queue for asynchronous operations. Restricts the number of operations executed per time interval and the number of concurrent operations in progress.
 
 ```js
 import { RateLimitedQueue } from 'simple-rate-limited-queue'
@@ -10,8 +10,10 @@ import { RateLimitedQueue } from 'simple-rate-limited-queue'
 const queue = new RateLimitedQueue()
 
 function getUser(id) {
-  return queue.schedule(() => axios.get(`/user/${id}`))
+  return queue.schedule(() => get(`/user/${id}`))
 }
+
+const user = await getUser(123)
 ```
 
 ## Installation
@@ -32,31 +34,33 @@ $ npm install --save simple-rate-limited-queue
 
 ## API
 
-### `new RateLimitedQueue([options] = {})`
+### `new RateLimitedQueue([options = {}])`
 
 Creates a new queue instance. The options are:
 
-| Name             | Type     | Description                                                    |
-| ---------------- | -------- | -------------------------------------------------------------- |
-| `maxConcurrency` | `number` | The maximum number of operations to execute per time interval. |
-| `intervalLength` | `number` | The length of each time interval in milliseconds.              |
+| Name               | Type   | Description                                                    |
+| ------------------ | ------ | -------------------------------------------------------------- |
+| `maxPerInterval`   | number | The maximum number of operations to execute per time interval. |
+| `maxOpsInProgress` | number | The maximum number of concurrent operations in progress        |
+| `intervalLength`   | number | The length of each time interval in milliseconds.              |
 
 All of the options and their defaults are shown below:
 
 ```js
 const queue = new RateLimitedQueue({
-  maxConcurrency: 10,
+  maxPerInterval: 10,
+  maxOpsInProgress: 20,
   intervalLength: 1000,
 })
 ```
 
-#### `queue.schedule(operation[, addToFront])`
+#### `queue.schedule(operation[, addToFront = false])`
 
-Adds an operation to the queue and returns a promise which will resolve or reject with the result of the operation. Optionally place the operation at the front of the queue.
+Adds an operation to the queue and returns a promise which will resolve or reject with the result of the operation. Optionally, the operation can be placed at the front of the queue.
 
 #### `queue.pause()`
 
-Pauses the queue. Cancels the current interval.
+Pauses the queue. Cancels the current interval. Allows in progress jobs finish and new operations may still be scheduled.
 
 #### `queue.resume()`
 
@@ -64,11 +68,11 @@ Resumes the queue after pausing. Starts a new interval.
 
 #### `queue.terminate()`
 
-Terminates the queue. Cancels all queued operations. Prevents new operations being scheduled.
+Terminates the queue. Cancels the current interval and cancels all queued operations. Prevents new operations being scheduled.
 
 #### `queue.reset()`
 
-Resets the queue after termination. Enables new operations to be scheduled.
+Resets the queue after termination. Starts a new interval and allows new operations to be scheduled again.
 
 #### `queue.pending`
 

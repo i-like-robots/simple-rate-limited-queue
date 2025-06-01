@@ -3,7 +3,9 @@ import { type Operation, Task } from './Task.js'
 
 type Options = {
   /** The maximum number of operations to execute per time interval */
-  maxConcurrency: number
+  maxPerInterval: number
+  /** The maximum number of concurrent operations in progress  */
+  maxInProgress: number
   /** The length of each time interval in milliseconds */
   intervalLength: number
 }
@@ -17,15 +19,23 @@ class RateLimitedQueue {
 
   #inProgress = 0
 
+  #intervalCount = 0
+
   #timeoutId: NodeJS.Timeout = undefined
 
-  #maxConcurrency = 10
+  #maxPerInterval = 10
+
+  #maxInProgress = 20
 
   #intervalLength = 1000
 
   constructor(options: Partial<Options> = {}) {
-    if (typeof options.maxConcurrency === 'number') {
-      this.#maxConcurrency = options.maxConcurrency
+    if (typeof options.maxPerInterval === 'number') {
+      this.#maxPerInterval = options.maxPerInterval
+    }
+
+    if (typeof options.maxInProgress === 'number') {
+      this.#maxInProgress = options.maxInProgress
     }
 
     if (typeof options.intervalLength === 'number') {
@@ -36,9 +46,14 @@ class RateLimitedQueue {
   #run() {
     if (this.#isPaused || this.#isTerminated || this.#timeoutId) return
 
-    while (this.#inProgress < this.#maxConcurrency && this.#queue.size > 0) {
+    while (
+      this.#intervalCount < this.#maxPerInterval &&
+      this.#inProgress < this.#maxInProgress &&
+      this.#queue.size > 0
+    ) {
       const task = this.#queue.shift()
 
+      this.#intervalCount++
       this.#inProgress++
 
       void task.exec().finally(() => {
@@ -62,6 +77,8 @@ class RateLimitedQueue {
       clearTimeout(this.#timeoutId)
       this.#timeoutId = undefined
     }
+
+    this.#intervalCount = 0
   }
 
   #onInterval() {
