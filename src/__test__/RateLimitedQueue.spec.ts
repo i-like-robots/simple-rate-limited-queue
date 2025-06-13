@@ -252,4 +252,27 @@ describe('RateLimitedQueue', () => {
       await expect(queue.schedule(mockFn)).rejects.toThrowError()
     })
   })
+
+  describe('.token()', () => {
+    it('throws when the queue is terminated', async () => {
+      const queue = new RateLimitedQueue({ maxPerInterval: 1 })
+      const mockFn = vitest.fn(() => 42)
+
+      queue.token()
+      queue.token().then(mockFn)
+      queue.token().then(mockFn)
+      queue.token().then(mockFn)
+
+      expect(mockFn).toHaveBeenCalledTimes(0)
+
+      await vitest.advanceTimersByTimeAsync(1000)
+      expect(mockFn).toHaveBeenCalledTimes(1)
+
+      await vitest.advanceTimersByTimeAsync(1000)
+      expect(mockFn).toHaveBeenCalledTimes(2)
+
+      await vitest.advanceTimersByTimeAsync(1000)
+      expect(mockFn).toHaveBeenCalledTimes(3)
+    })
+  })
 })

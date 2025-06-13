@@ -2,7 +2,7 @@
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/i-like-robots/simple-rate-limited-queue/blob/main/LICENSE) ![build status](https://github.com/i-like-robots/simple-rate-limited-queue/actions/workflows/test.yml/badge.svg?branch=main) [![npm version](https://img.shields.io/npm/v/simple-rate-limited-queue.svg?style=flat)](https://www.npmjs.com/package/simple-rate-limited-queue)
 
-A simple rate limited queue for asynchronous operations. Restricts the number of operations executed per time interval and the number of concurrent operations in progress.
+A simple rate limited queue for asynchronous operations. Restricts the number of operations executed per time interval and the number of concurrent operations in progress. No dependencies, under 1Kb gzipped.
 
 ```js
 import { RateLimitedQueue } from 'simple-rate-limited-queue'
@@ -54,9 +54,14 @@ const queue = new RateLimitedQueue({
 })
 ```
 
-#### `queue.schedule(operation[, addToFront = false])`
+#### `queue.schedule(operation[, scheduleFirst = false])`
 
-Adds an operation to the queue and returns a promise which will resolve or reject with the result of the operation. Optionally, the operation can be placed at the front of the queue.
+Adds an operation to the queue and returns a promise which will resolve or reject with the result of the operation when it is executed. Will reject if the queue is terminated. Optionally, the operation can be placed at the front of the queue.
+
+#### `queue.token([scheduleFirst = false])`
+
+Returns a promise which will resolve when the token reaches the front of the queue. Will reject if the queue is terminated. Optionally, the token can be placed at the front of the queue.
+
 
 #### `queue.pause()`
 

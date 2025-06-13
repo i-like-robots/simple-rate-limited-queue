@@ -1,6 +1,8 @@
 import { Dequeue } from './Dequeue.js'
 import { type Operation, Task } from './Task.js'
 
+const NO_OP = () => {}
+
 type Options = {
   /** The maximum number of operations to execute per time interval */
   maxPerInterval: number
@@ -122,14 +124,14 @@ class RateLimitedQueue {
     this.#startInterval()
   }
 
-  async schedule<T>(operation: Operation<T>, addToFront = false): Promise<T> {
+  async schedule<T>(operation: Operation<T>, scheduleFirst = false): Promise<T> {
     if (this.#isTerminated) {
       throw new Error('Failed to schedule task, the queue has been terminated')
     }
 
     const task = new Task<T>(operation)
 
-    if (addToFront) {
+    if (scheduleFirst) {
       this.#queue.unshift(task)
     } else {
       this.#queue.push(task)
@@ -138,6 +140,10 @@ class RateLimitedQueue {
     this.#run()
 
     return task.promise
+  }
+
+  async token(scheduleFirst = false): Promise<void> {
+    await this.schedule(NO_OP, scheduleFirst)
   }
 
   get pending() {
