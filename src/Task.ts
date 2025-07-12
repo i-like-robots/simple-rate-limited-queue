@@ -1,3 +1,5 @@
+import { isFunction } from "./isFunction"
+
 export type Operation<T> = () => T | PromiseLike<T>
 
 export enum Status {
@@ -5,12 +7,6 @@ export enum Status {
   Executing,
   Fulfilled,
   Rejected,
-}
-
-function isFunction(value: unknown): asserts value is Operation<unknown> {
-  if (typeof value !== 'function') {
-    throw new TypeError('Operation must be a function')
-  }
 }
 
 export class Task<T> {
