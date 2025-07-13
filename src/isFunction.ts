@@ -1,7 +1,5 @@
-import { type Operation } from './Task'
-
-export function isFunction(value: unknown): asserts value is Operation<unknown> {
+export function isFunction(value: unknown): asserts value is Function {
   if (typeof value !== 'function') {
-    throw new TypeError('Operation must be a function')
+    throw new TypeError('Value must be a function')
   }
 }

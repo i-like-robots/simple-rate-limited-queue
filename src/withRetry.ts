@@ -8,6 +8,7 @@ function wait(ms: number): Promise<void> {
 export type ShouldRetry = (error: unknown, executions: number) => number | void
 
 export function withRetry<T>(operation: Operation<T>, shouldRetry: ShouldRetry) {
+  isFunction(operation)
   isFunction(shouldRetry)
 
   let executions = 0

@@ -1,4 +1,4 @@
-import { isFunction } from "./isFunction"
+import { isFunction } from './isFunction'
 
 export type Operation<T> = () => T | PromiseLike<T>
 
