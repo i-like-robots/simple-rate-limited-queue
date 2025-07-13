@@ -2,14 +2,9 @@ export type Operation<T> = () => T | PromiseLike<T>
 
 export enum Status {
   Pending,
+  Executing,
   Fulfilled,
   Rejected,
-}
-
-function isFunction(value: unknown): asserts value is Operation<unknown> {
-  if (typeof value !== 'function') {
-    throw new TypeError('Operation must be a function')
-  }
 }
 
 export class Task<T> {
@@ -24,7 +19,9 @@ export class Task<T> {
   #reject: (value?: unknown) => void
 
   constructor(operation: Operation<T>) {
-    isFunction(operation)
+    if (typeof operation !== 'function') {
+      throw new TypeError('Operation must be a function')
+    }
 
     this.#operation = operation
 
@@ -38,6 +35,8 @@ export class Task<T> {
   async exec() {
     if (this.#status !== Status.Pending) return
 
+    this.#status = Status.Executing
+
     try {
       const result = await this.#operation()
       this.resolve(result)
@@ -47,17 +46,21 @@ export class Task<T> {
   }
 
   resolve(value: T) {
-    if (this.#status !== Status.Pending) return
+    if (this.settled) return
 
     this.#status = Status.Fulfilled
     this.#resolve(value)
   }
 
   reject(reason: unknown = 'Task cancelled') {
-    if (this.#status !== Status.Pending) return
+    if (this.settled) return
 
     this.#status = Status.Rejected
     this.#reject(reason)
+  }
+
+  get settled() {
+    return this.#status === Status.Fulfilled || this.#status === Status.Rejected
   }
 
   get status() {

@@ -28,21 +28,17 @@ $ npm install --save simple-rate-limited-queue
 [npm]: https://www.npmjs.com/
 [npm install]: https://docs.npmjs.com/getting-started/installing-npm-packages-locally
 
-## Features
-
-...
-
 ## API
 
 ### `new RateLimitedQueue([options = {}])`
 
 Creates a new queue instance. The options are:
 
-| Name               | Type   | Description                                                    |
-| ------------------ | ------ | -------------------------------------------------------------- |
-| `maxPerInterval`   | number | The maximum number of operations to execute per time interval. |
-| `maxInProgress` | number | The maximum number of concurrent operations in progress        |
-| `intervalLength`   | number | The length of each time interval in milliseconds.              |
+| Name             | Type   | Description                                                    |
+| ---------------- | ------ | -------------------------------------------------------------- |
+| `maxPerInterval` | number | The maximum number of operations to execute per time interval. |
+| `maxInProgress`  | number | The maximum number of concurrent operations in progress        |
+| `intervalLength` | number | The length of each time interval in milliseconds.              |
 
 All of the options and their defaults are shown below:
 
@@ -61,7 +57,6 @@ Adds an operation to the queue and returns a promise which will resolve or rejec
 #### `queue.token([scheduleFirst = false])`
 
 Returns a promise which will resolve when the token reaches the front of the queue. Will reject if the queue is terminated. Optionally, the token can be placed at the front of the queue.
-
 
 #### `queue.pause()`
 
@@ -94,6 +89,28 @@ Returns a boolean indicating whether the queue has been paused.
 #### `queue.isTerminated`
 
 Returns a boolean indicating whether the queue has been terminated.
+
+### `withRetry(operation, shouldRetry)`
+
+A higher-order function to wrap operations and optionally retry them on failure.
+
+To retry, return a number from the `shouldRetry` callback. The number returned is how many milliseconds to wait before retrying the operation. Return `0` to retry immediately or any other value to reject with the original error.
+
+```js
+import { withRetry } from 'simple-rate-limited-queue'
+
+// Try a request up to 3 times with a 1 second delay between executions
+const getWithRetry = withRetry(get, (error, count) => {
+  console.error('Request failed', error)
+  if (count <= 3) return 1000
+})
+
+function getUser(id) {
+  return queue.schedule(() => getWithRetry(`/user/${id}`))
+}
+```
+
+_NOTE:_ When you retry an operation it will not go to the back of the queue. Instead, it will stay in the executing state until it is settled or you stop retrying it. This means that it counts as an in progress operation even while it's waiting to be retried.
 
 ## License
 
