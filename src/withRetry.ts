@@ -1,4 +1,3 @@
-import { isFunction } from './isFunction'
 import { type Operation } from './Task'
 
 function wait(ms: number): Promise<void> {
@@ -8,8 +7,13 @@ function wait(ms: number): Promise<void> {
 export type ShouldRetry = (error: unknown, executions: number) => number | void
 
 export function withRetry<T>(operation: Operation<T>, shouldRetry: ShouldRetry) {
-  isFunction(operation)
-  isFunction(shouldRetry)
+  if (typeof operation !== 'function') {
+    throw new TypeError('Operation must be a function')
+  }
+
+  if (typeof shouldRetry !== 'function') {
+    throw new TypeError('Should retry callback must be a function')
+  }
 
   let executions = 0
 
