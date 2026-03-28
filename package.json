@@ -38,16 +38,16 @@
   },
   "homepage": "https://github.com/i-like-robots/simple-rate-limited-queue",
   "devDependencies": {
-    "@types/node": "^20.14.8",
-    "eslint": "^9.39.0",
+    "@eslint/js": "^10.0.0",
+    "@types/node": "^25.5.0",
     "husky": "^9.1.6",
-    "lint-staged": "^16.2.6",
-    "pkgroll": "^2.21.4",
-    "prettier": "^3.7.4",
+    "lint-staged": "^16.4.0",
+    "pkgroll": "^2.27.0",
+    "prettier": "^3.8.0",
     "typescript": "^5.9.2",
-    "typescript-eslint": "^8.51.0",
-    "vite": "^7.3.0",
-    "vitest": "^4.0.16"
+    "typescript-eslint": "^8.57.0",
+    "vite": "^8.0.2",
+    "vitest": "^4.1.2"
   },
   "engines": {
     "node": ">= 20.10.0"
